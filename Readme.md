@@ -54,3 +54,13 @@ Build the library:
 sudo make clean
 sudo make install all
 ```
+
+## Running the code: 
+
+Clone the repo: 
+
+> git clone https://github.com/xBlaz3kx/nfc-reader-go-example/
+
+Install the libnfc, then run:
+
+> go run nfc-reader-example.go 
