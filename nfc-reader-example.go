@@ -61,19 +61,51 @@ func (reader *TagReader) ListenForTags() {
 		// Check if any tag was detected
 		if tagCount > 0 {
 			fmt.Printf(target.String())
+			// Transform the target to a specific tag Type and send the UID to the channel
 			switch target.Modulation() {
 			case nfc.Modulation{Type: nfc.ISO14443a, BaudRate: nfc.Nbr106}:
-				UID = hex.EncodeToString(target.(*nfc.ISO14443aTarget).UID[:])
+				var card = target.(*nfc.ISO14443aTarget)
+				var UIDLen = card.UIDLen
+				var ID = card.UID
+				// Transform the UID to string and cut the excess bytes
+				UID = hex.EncodeToString(ID[:])
+				UID = UID[:UIDLen]
+				break
 			case nfc.Modulation{Type: nfc.ISO14443b, BaudRate: nfc.Nbr106}:
-				UID = hex.EncodeToString(target.(*nfc.ISO14443bTarget).ApplicationData[:])
+				var card = target.(*nfc.ISO14443bTarget)
+				var UIDLen = len(card.ApplicationData)
+				var ID = card.ApplicationData
+				UID = hex.EncodeToString(ID[:])
+				UID = UID[:UIDLen]
+				break
 			case nfc.Modulation{Type: nfc.Felica, BaudRate: nfc.Nbr212}:
-				UID = hex.EncodeToString(target.(*nfc.FelicaTarget).ID[:])
+				var card = target.(*nfc.FelicaTarget)
+				var UIDLen = card.Len
+				var ID = card.ID
+				UID = hex.EncodeToString(ID[:])
+				UID = UID[:UIDLen]
+				break
 			case nfc.Modulation{Type: nfc.Felica, BaudRate: nfc.Nbr424}:
-				UID = hex.EncodeToString(target.(*nfc.FelicaTarget).ID[:])
+				var card = target.(*nfc.FelicaTarget)
+				var UIDLen = card.Len
+				var ID = card.ID
+				UID = hex.EncodeToString(ID[:])
+				UID = UID[:UIDLen]
+				break
 			case nfc.Modulation{Type: nfc.Jewel, BaudRate: nfc.Nbr106}:
-				UID = hex.EncodeToString(target.(*nfc.JewelTarget).ID[:])
+				var card = target.(*nfc.JewelTarget)
+				var ID = card.ID
+				var UIDLen = len(ID)
+				UID = hex.EncodeToString(ID[:])
+				UID = UID[:UIDLen]
+				break
 			case nfc.Modulation{Type: nfc.ISO14443biClass, BaudRate: nfc.Nbr106}:
-				UID = hex.EncodeToString(target.(*nfc.ISO14443biClassTarget).UID[:])
+				var card = target.(*nfc.ISO14443biClassTarget)
+				var ID = card.UID
+				var UIDLen = len(ID)
+				UID = hex.EncodeToString(ID[:])
+				UID = UID[:UIDLen]
+				break
 			}
 			// Send the UID of the tag to main goroutine
 			reader.TagChannel <- UID
@@ -87,7 +119,7 @@ func main() {
 	quitChannel := make(chan os.Signal, 1)
 	// Create an abstraction of the Reader, DeviceConnection string is empty if you want the library to autodetect your reader
 	rfidReader := &TagReader{TagChannel: rfidChannel, DeviceConnection: ""}
-	// Listen for a RFID/NFC tag in another goroutine
+	// Listen for an RFID/NFC tag in another goroutine
 	go rfidReader.ListenForTags()
 	for {
 		fmt.Printf("%s: Waiting for a tag \n", time.Now().String())
