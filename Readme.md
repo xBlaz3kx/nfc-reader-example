@@ -10,57 +10,66 @@ Adafruit: [Building libnfc on Raspberry Pi](https://learn.adafruit.com/adafruit-
 
 ## Building libnfc for PN532
 
-Get and extract the libnfc:
+1. Get and extract the libnfc:
 
-```
- cd ~
- mkdir libnfc && cd libnfc/
- wget https://github.com/nfc-tools/libnfc/releases/download/libnfc-1.8.0/libnfc-1.8.0.tar.bz2
- tar -xvjf libnfc-1.8.0.tar.bz2
-```
+    ```bash
+     cd ~
+     mkdir libnfc && cd libnfc/
+     wget https://github.com/nfc-tools/libnfc/releases/download/libnfc-1.8.0/libnfc-1.8.0.tar.bz2
+     tar -xvjf libnfc-1.8.0.tar.bz2
+    ```
 
-**Next two steps may vary for your reader**
+   **Next two steps depend on your reader and it's configuration of libnfc**
 
-Create PN532 configuration:
+2. Create PN532 configuration:
 
-```
- cd libnfc-1.8.0
- sudo mkdir /etc/nfc
- sudo mkdir /etc/nfc/devices.d
- sudo cp contrib/libnfc/pn532_uart_on_rpi.conf.sample /etc/nfc/devices.d/pn532_uart_on_rpi.conf 
- sudo nano /etc/nfc/devices.d/pn532_uart_on_rpi.conf
-```
+    ```bash
+     cd libnfc-1.8.0
+     sudo mkdir /etc/nfc
+     sudo mkdir /etc/nfc/devices.d
+     sudo cp contrib/libnfc/pn532_uart_on_rpi.conf.sample /etc/nfc/devices.d/pn532_uart_on_rpi.conf 
+     sudo nano /etc/nfc/devices.d/pn532_uart_on_rpi.conf
+    ```
 
-Update the file:
+3. Update the _pn532_uart_on_rpi.conf_:
 
-> allow_intrusive_scan = true
+   ```text
+   allow_intrusive_scan = true
+   ```
 
+4. Install dependencies for building:
 
-Install dependencies for building:
+   ```bash
+    sudo apt-get install autoconf
+    sudo apt-get install libtool
+    sudo apt-get install libpcsclite-dev libusb-dev
+    autoreconf -vis
+    ./configure --with-drivers=pn532_uart --sysconfdir=/etc --prefix=/usr
+   ```
 
-```
- sudo apt-get install autoconf
- sudo apt-get install libtool
- sudo apt-get install libpcsclite-dev libusb-dev
- autoreconf -vis
- ./configure --with-drivers=pn532_uart --sysconfdir=/etc --prefix=/usr
+5. Build the library:
 
+   ```bash
+   sudo make clean
+   sudo make install all
+   ```
 
-```
+## Running the code:
 
-Build the library:
+Clone the repo:
 
-```
-sudo make clean
-sudo make install all
-```
-
-## Running the code: 
-
-Clone the repo: 
-
-> git clone https://github.com/xBlaz3kx/nfc-reader-go-example/
+   ```bash
+   git clone https://github.com/xBlaz3kx/nfc-reader-go-example/
+   ```
 
 Install the libnfc, then run:
 
-> go run nfc-reader-example.go 
+   ```bash
+   go run nfc-reader-example.go 
+   ```
+
+or
+
+  ```bash
+   go build nfc-reader-example.go && ./nfc-reader-example
+   ```
